@@ -113,12 +113,9 @@ KEYS = {
 
 # SETUP
 # ===================================================================
-def createWindow(width=1280, height=720, fullscreen=False):
+def createWindow(width=1280, height=720):
     global screen
-    if fullscreen:
-        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-    else:
-        screen = pygame.display.set_mode((width, height))
+    screen = pygame.display.set_mode((width, height))
 
 def title(content):
     pygame.display.set_caption(content)

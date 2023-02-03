@@ -1,10 +1,10 @@
-from PgLib import *
+from GWTPygame import *
 
 WIDTH, HEIGHT = 1280, 720
 
 # Called once at the start
 def setup():
-    createWindow(WIDTH, HEIGHT, False)
+    createWindow(WIDTH, HEIGHT)
     title("Your Title Here")
 
 # Called every frame
