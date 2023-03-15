@@ -1,14 +1,6 @@
-import pygame
+import pygame, pygame.gfxdraw
 import random as rndm
 from math import floor
-
-screen = None
-clock = pygame.time.Clock()
-dt = 0
-
-spriteGroup = pygame.sprite.Group()
-
-shouldQuit = False
 
 KEYS = {
     "BACKSPACE"    : pygame.K_BACKSPACE,
@@ -113,6 +105,7 @@ KEYS = {
 
 # SETUP
 # ===================================================================
+screen = None
 def createWindow(width=1280, height=720):
     global screen
     screen = pygame.display.set_mode((width, height))
@@ -120,30 +113,84 @@ def createWindow(width=1280, height=720):
 def title(content):
     pygame.display.set_caption(content)
 # ===================================================================
-# DELTATIME
+# COLOUR && TEXTURE
 # ===================================================================
-def deltaTime(set=False):
-    global clock, dt
-    if not set:
-        return dt
-    dt = clock.tick() / 1000
-# ===================================================================
-# COLOUR
-# ===================================================================
-def background(red, green, blue):
+def Background(red, green, blue):
     screen.fill((red, green, blue))
 
 # Easier to understand than just using a random tuple as in regular pygame functions
-def colour(red, green, blue, alpha=255):
+def Colour(red, green, blue, alpha=255):
     return (red, green, blue, alpha)
-# ===================================================================
-# Sprite Stuff
-# ===================================================================
-def circle(position, radius, fill):
-    pygame.draw.circle(screen, fill, (int(position.x), int(position.y)), radius)
 
-def rect(position, width, height, fill):
-    pygame.draw.rect(screen, fill, (int(position.x), int(position.y), width, height))
+def Texture(path):
+    
+    return pygame.image.load(path)
+# ===================================================================
+# SPRITE STUFF
+# ===================================================================
+TEXTURE = 0
+ELLIPSE = 1
+RECT = 2
+
+sprites = pygame.sprite.Group()
+class Sprite(pygame.sprite.Sprite):
+    def __init__(self, spriteType, width, height, position, fill):
+        super().__init__()
+
+        self.size = Vector(width, height)
+
+        self.position = position
+        self.velocity = Vector(0, 0)
+
+        if spriteType == 0:
+            self.image = pygame.transform.scale(fill, (width, height))
+        elif spriteType == 1:
+            self.image = pygame.Surface((width + 1, height + 1), pygame.SRCALPHA)
+            pygame.gfxdraw.aaellipse(self.image, int(width/2), int(height/2), int(width/2), int(height/2), fill)
+            pygame.gfxdraw.filled_ellipse(self.image, int(width/2), int(height/2), int(width/2), int(height/2), fill)
+        else:
+            self.image = pygame.Surface((width, height), pygame.SRCALPHA)
+            self.image.fill(fill)
+        
+        self.rect = self.image.get_rect(center=(position.x - width, position.y - height))
+        sprites.add(self)
+
+    def update(self):
+        self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
+
+    def setPos(self, *args):
+        if type(args[0]) == Vector:
+            posToSet = args[0]
+        else:
+            posToSet = Vector(args[0], args[1])
+        self.position = posToSet
+
+    def addPos(self, *args):
+        if type(args[0]) == Vector:
+            posToAdd = args[0]
+        else:
+            posToAdd = Vector(args[0], args[1])
+        self.position = self.position.addVec(posToAdd.mult(deltaTime()))
+
+    def setVel(self, *args):
+        if type(args[0]) == Vector:
+            velToSet = args[0]
+        else:
+            velToSet = Vector(args[0], args[1])
+        self.velocity = velToSet
+
+    def addVel(self, *args):
+        if type(args[0]) == Vector:
+            vecToAdd = args[0]
+        else:
+            vecToAdd = Vector(args[0], args[1])
+        self.velocity = self.velocity.addVec(vecToAdd.mult(deltaTime()))
+
+def drawSprites():
+    for sprite in sprites:
+        sprite.update()
+
+    sprites.draw(screen)
 # ===================================================================
 # INPUT
 # ===================================================================
@@ -152,7 +199,7 @@ def keyDown(key):
 # ===================================================================
 # VECTORS AND THINGS
 # ===================================================================
-class vector:
+class Vector:
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -160,25 +207,55 @@ class vector:
     def set(self, x, y):
         self.x = x
         self.y = y
+
+    def mult(self, scalar):
+        return Vector(self.x * scalar, self.y * scalar)
+
+    def addVec(self, vector):
+        return Vector(self.x + vector.x, self.y + vector.y)
 # ===================================================================
-# Tools
+# TOOLS
 # ===================================================================
 def random(min = 0, max = 1):
     return (rndm.random() * (max - min)) + min
 
+shouldQuit = False
 def quit(probe=False):
     global shouldQuit
     if probe:
         return shouldQuit
     shouldQuit = True
+
+clock = pygame.time.Clock()
+dt = 0
+def deltaTime(set=False):
+    global clock, dt
+    if not set:
+        return dt
+    dt = clock.tick() / 1000
 # ===================================================================
-# Text
+# TEXT
 # ===================================================================
-def text(position, content="Text", size=32, fill=colour(255, 255, 255), highlight=colour(0, 0, 0)):
+def text(position, content="Text", **args):
     global screen
 
+    if "size" in args:
+        size = args["size"]
+    else:
+        size = 32
+
+    if "fill" in args:
+        fill = args["fill"]
+    else:
+        fill = Colour(0, 0, 0)
+
     fontObj = pygame.font.Font('freesansbold.ttf', size)
-    textObj = fontObj.render(content, True, fill, highlight)
+
+    if "highlight" in args:
+        textObj = fontObj.render(content, True, fill, args["highlight"])
+    else:
+        textObj = fontObj.render(content, True, fill)
+
     textRect = textObj.get_rect()
     textRect.center = (position.x, position.y)
     screen.blit(textObj, textRect)

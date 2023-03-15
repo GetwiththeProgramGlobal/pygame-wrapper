@@ -13,6 +13,7 @@ if __name__ == '__main__':
                 shouldQuit = True
         
         Project.update()
+        Project.drawSprites()
         pygame.display.flip()
 
         Project.deltaTime(True)
