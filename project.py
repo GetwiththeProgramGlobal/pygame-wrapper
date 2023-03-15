@@ -1,4 +1,4 @@
-from GWTPygame import *
+from gwtp import *
 
 WIDTH, HEIGHT = 1280, 720
 
