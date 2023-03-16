@@ -4,8 +4,8 @@
 ___
 ### Prerequisites
 
-* A python version *at least* 3.9.x must be installed.
-* Pygame must be installed
+* A python version *at least* 3.9.x must be installed. https://www.python.org/downloads/
+* Pygame must be installed (run `pip install pygame` in a terminal, or if that doesn't work try `pip3 install pygame`
 * To run, ***DO run*** `main.py` ***NOT*** the 2 other files
 ___
 ### The Template
