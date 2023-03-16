@@ -2,12 +2,6 @@
 
 #### This is a very very early prototype of some instructions for a task. The actual instructions would have an accompanying video and a reference to look up a more in-depth explanation of the various functions available. Testy people don't bother doing the `Extra:` bits, that was just me trying to come up with stuff.
 ___
-### Prerequisites
-
-* A python version *at least* 3.9.x must be installed.
-* Pygame must be installed
-* To run, ***DO run*** `main.py` ***NOT*** the 2 other files
-___
 ### The Template
 
 Inside `project.py`, you will see a statement that imports everything from our library. 

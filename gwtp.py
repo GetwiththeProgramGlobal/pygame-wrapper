@@ -110,17 +110,29 @@ def createWindow(width=1280, height=720):
     global screen
     screen = pygame.display.set_mode((width, height))
 
-def title(content):
+def Title(content):
     pygame.display.set_caption(content)
 # ===================================================================
 # COLOUR && TEXTURE
 # ===================================================================
-def Background(red, green, blue):
-    screen.fill((red, green, blue))
+def Background(*args):
+    if len(args) == 1:
+        screen.fill((args[0], args[0], args[0]))
+    elif len(args) == 3:
+        screen.fill((args[0], args[1], args[1]))
+    else:
+        print(f"Invalid number of arguments for Background (Expected: 1 or 3; Got: {len(args)})")
 
 # Easier to understand than just using a random tuple as in regular pygame functions
-def Colour(red, green, blue, alpha=255):
-    return (red, green, blue, alpha)
+def Colour(*args):
+    if len(args) == 1:
+        return (args[0], args[0], args[0], 255)
+    elif len(args) == 3:
+        return (args[0], args[1], args[2], 255)
+    elif len(args == 4):
+        return (args[0], args[1], args[2], args[3])
+    else:
+        print(f"Invalid number of arguments for Colour (Expected: 1, 3, or 4; Got: {len(args)})")
 
 def Texture(path):
     
