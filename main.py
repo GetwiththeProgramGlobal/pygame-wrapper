@@ -1,8 +1,8 @@
-# RUN ME!!!!
+#!/usr/bin/env bash
 
 import pygame, project
 
-if __name__ == '__main__':
+def main():
     pygame.init()
     project.setup()
 
@@ -19,3 +19,6 @@ if __name__ == '__main__':
         project.deltaTime(True)
 
     pygame.quit()
+
+if __name__ == '__main__':
+    main()

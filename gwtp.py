@@ -1,5 +1,3 @@
-# DON'T RUN ME
-
 import pygame, pygame.gfxdraw
 import random as rndm
 from math import floor
@@ -22,6 +20,7 @@ KEYS = {
     "6"            : pygame.K_7,
     "8"            : pygame.K_8,
     "9"            : pygame.K_9,
+    "0"            : pygame.K_0,
     "SEMICOLON"    : pygame.K_SEMICOLON,
     "EQUALS"       : pygame.K_EQUALS,
     "LEFTBRACKET"  : pygame.K_LEFTBRACKET,
@@ -55,23 +54,23 @@ KEYS = {
     "Y"            : pygame.K_y,
     "Z"            : pygame.K_z,
     "DELETE"       : pygame.K_DELETE,
-    "KP0"          : pygame.K_KP0,
-    "KP1"          : pygame.K_KP1,
-    "KP2"          : pygame.K_KP2,
-    "KP3"          : pygame.K_KP3,
-    "KP4"          : pygame.K_KP4,
-    "KP5"          : pygame.K_KP5,
-    "KP6"          : pygame.K_KP6,
-    "KP7"          : pygame.K_KP7,
-    "KP8"          : pygame.K_KP8,
-    "KP9"          : pygame.K_KP9,
-    "KP_PERIOD"    : pygame.K_KP_PERIOD,
-    "KP_SLASH"     : pygame.K_KP_DIVIDE,
-    "KP_MULTIPLY"  : pygame.K_KP_MULTIPLY,
-    "KP_MINUS"     : pygame.K_KP_MINUS,
-    "KP_PLUS"      : pygame.K_KP_PLUS,
-    "KP_ENTER"     : pygame.K_KP_ENTER,
-    "KP_EQUALS"    : pygame.K_KP_EQUALS,
+    "NUM0"         : pygame.K_KP0,
+    "NUM1"         : pygame.K_KP1,
+    "NUM2"         : pygame.K_KP2,
+    "NUM3"         : pygame.K_KP3,
+    "NUM4"         : pygame.K_KP4,
+    "NUM5"         : pygame.K_KP5,
+    "NUM6"         : pygame.K_KP6,
+    "NUM7"         : pygame.K_KP7,
+    "NUM8"         : pygame.K_KP8,
+    "NUM9"         : pygame.K_KP9,
+    "NUM_PERIOD"   : pygame.K_KP_PERIOD,
+    "NUM_SLASH"    : pygame.K_KP_DIVIDE,
+    "NUM_MULTIPLY" : pygame.K_KP_MULTIPLY,
+    "NUM_MINUS"    : pygame.K_KP_MINUS,
+    "NUM_PLUS"     : pygame.K_KP_PLUS,
+    "NUM_ENTER"    : pygame.K_KP_ENTER,
+    "NUM_EQUALS"   : pygame.K_KP_EQUALS,
     "UP"           : pygame.K_UP,
     "DOWN"         : pygame.K_DOWN,
     "LEFT"         : pygame.K_LEFT,
@@ -183,32 +182,32 @@ class Sprite(pygame.sprite.Sprite):
     def update(self):
         self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
 
-    def setPos(self, *args):
-        if type(args[0]) == Vector:
-            posToSet = args[0]
+    def setPos(self, *position):
+        if type(position[0]) == Vector:
+            posToSet = position[0]
         else:
-            posToSet = Vector(args[0], args[1])
+            posToSet = Vector(position[0], position[1])
         self.position = posToSet
 
-    def addPos(self, *args):
-        if type(args[0]) == Vector:
-            posToAdd = args[0]
+    def addPos(self, *position):
+        if type(position[0]) == Vector:
+            posToAdd = position[0]
         else:
-            posToAdd = Vector(args[0], args[1])
+            posToAdd = Vector(position[0], position[1])
         self.position = self.position.addVec(posToAdd.mult(deltaTime()))
 
-    def setVel(self, *args):
-        if type(args[0]) == Vector:
-            velToSet = args[0]
+    def setVel(self, *velocity):
+        if type(velocity[0]) == Vector:
+            velToSet = velocity[0]
         else:
-            velToSet = Vector(args[0], args[1])
+            velToSet = Vector(velocity[0], velocity[1])
         self.velocity = velToSet
 
-    def addVel(self, *args):
-        if type(args[0]) == Vector:
-            vecToAdd = args[0]
+    def addVel(self, *velocity):
+        if type(velocity[0]) == Vector:
+            vecToAdd = velocity[0]
         else:
-            vecToAdd = Vector(args[0], args[1])
+            vecToAdd = Vector(velocity[0], velocity[1])
         self.velocity = self.velocity.addVec(vecToAdd.mult(deltaTime()))
 
 def drawSprites():
