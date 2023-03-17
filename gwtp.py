@@ -264,18 +264,18 @@ BOTTOM = "bottom"
 LEFT = "left"
 RIGHT = "right"
 
-def ifOnEdgeBounce(obj, *args):
-    if ("top" in args) and obj.position.y <= 0:
+def ifOnEdgeBounce(obj, *edges):
+    if ("top" in edges) and obj.position.y <= 0:
         obj.setPos(obj.position.x, 0)
         obj.setVel(obj.velocity.x, -obj.velocity.y)
-    elif ("bottom" in args) and obj.position.y >= _screenHeight:
+    elif ("bottom" in edges) and obj.position.y >= _screenHeight:
         obj.setPos(obj.position.x, _screenHeight)
         obj.setVel(obj.velocity.x, -obj.velocity.y)
     
-    if ("left" in args) and obj.position.x <= 0:
+    if ("left" in edges) and obj.position.x <= 0:
         obj.setPos(0, obj.position.y)
         obj.setVel(-obj.velocity.x, obj.velocity.y)
-    elif ("right" in args) and obj.position.x >= _screenWidth:
+    elif ("right" in edges) and obj.position.x >= _screenWidth:
         obj.setPos(_screenWidth, obj.position.y)
         obj.setVel(obj.velocity.x, -obj.velocity.y)
 # ===================================================================
