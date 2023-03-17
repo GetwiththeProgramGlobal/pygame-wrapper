@@ -277,7 +277,7 @@ def ifOnEdgeBounce(obj, *edges):
         obj.setVel(-obj.velocity.x, obj.velocity.y)
     elif ("right" in edges) and obj.position.x >= _screenWidth:
         obj.setPos(_screenWidth, obj.position.y)
-        obj.setVel(obj.velocity.x, -obj.velocity.y)
+        obj.setVel(-obj.velocity.x, obj.velocity.y)
 # ===================================================================
 # TEXT
 # ===================================================================
