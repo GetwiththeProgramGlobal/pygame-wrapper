@@ -4,8 +4,8 @@
 ___
 ### Prerequisites
 
-* A python version *at least* 3.9.x must be installed.
-* Pygame must be installed
+* A python version *at least* 3.9.x must be installed. https://www.python.org/downloads/
+* Pygame must be installed (run `pip install pygame` in a terminal, or if that doesn't work try `pip3 install pygame`
 * To run, ***DO run*** `main.py` ***NOT*** the 2 other files
 ___
 ### The Template
@@ -38,13 +38,6 @@ player = Sprite(RECT, 200, 30, Vector(WIDTH / 2, HEIGHT - 60), Colour(255))
 * The next 2 arguments are the `width` and `height` of the sprite in pixels. I've chosen `200` by `30`.
 * Next, the `position` of the sprite is given by a `Vector()` (a data structure that holds 2 numbers). I've chosen the `x` position to be `WIDTH / 2` (i.e. the centre), and the `y` position to be `HEIGHT - 60`, or '60 pixels above the bottom'
 * Next, I've used the `Colour` function to set the colour to `255` (white)
-* Finally, go down to the `update()` function and add `drawSprites()` to it like so:
-```python
-def update():
-    Background(0)
-
-    drawSprites()
-```
 
 If you now run the game you should see a white rectangle on the screen.
 
