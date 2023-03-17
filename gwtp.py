@@ -109,10 +109,13 @@ KEYS = {
 # ===================================================================
 # SETUP
 # ===================================================================
-screen = None
+_screen = None
+_screenWidth, _screenHeight = None, None
 def createWindow(width=1280, height=720, caption="Your Caption Here"):
-    global screen
-    screen = pygame.display.set_mode((width, height))
+    global _screen, _screenWidth, _screenHeight
+    _screenWidth = width
+    _screenHeight = height
+    _screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption(caption)
 # ===================================================================
 # COLOUR && TEXTURE
@@ -120,11 +123,11 @@ def createWindow(width=1280, height=720, caption="Your Caption Here"):
 def Background(*args):
     if len(args) == 1:
         if type(args[0]) == int:
-            screen.fill((args[0], args[0], args[0]))
+            _screen.fill((args[0], args[0], args[0]))
         else:
-            screen.blit(args[0], (0, 0))
+            _screen.blit(args[0], (0, 0))
     elif len(args) == 3:
-        screen.fill((args[0], args[1], args[2]))
+        _screen.fill((args[0], args[1], args[2]))
     else:
         print(f"Invalid number of arguments for Background (Expected: 1 or 3; Got: {len(args)})")
 
@@ -144,11 +147,11 @@ def Texture(path):
 # ===================================================================
 # SPRITE STUFF
 # ===================================================================
-TEXTURE = 0
-ELLIPSE = 1
-RECT = 2
+TEXTURE = "tex"
+ELLIPSE = "ell"
+RECT = "_"
 
-sprites = pygame.sprite.Group()
+_sprites = pygame.sprite.Group()
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, spriteType, width, height, position, fill):
         super().__init__()
@@ -159,14 +162,14 @@ class Sprite(pygame.sprite.Sprite):
         self.position = position
         self.velocity = Vector(0, 0)
 
-        if spriteType == 0:
+        if spriteType == "tex":
             try:
                 self.image = pygame.transform.scale(fill, (width, height)) # In this case, `fill` is of type `pygame.Surface`
             except:
                 print("\nFailed to initialise Sprite: did you pass in a valid texture?\n")
                 sys.exit()
                 
-        elif spriteType == 1:
+        elif spriteType == "ell":
             self.image = pygame.Surface((width + 1, height + 1), pygame.SRCALPHA)
             pygame.gfxdraw.aaellipse(self.image, int(width/2), int(height/2), int(width/2), int(height/2), fill)
             pygame.gfxdraw.filled_ellipse(self.image, int(width/2), int(height/2), int(width/2), int(height/2), fill)
@@ -175,7 +178,7 @@ class Sprite(pygame.sprite.Sprite):
             self.image.fill(fill)
         
         self.rect = self.image.get_rect(center=(position.x - width, position.y - height))
-        sprites.add(self)
+        _sprites.add(self)
 
     def update(self):
         self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
@@ -209,10 +212,10 @@ class Sprite(pygame.sprite.Sprite):
         self.velocity = self.velocity.addVec(vecToAdd.mult(deltaTime()))
 
 def drawSprites():
-    for sprite in sprites:
+    for sprite in _sprites:
         sprite.update()
 
-    sprites.draw(screen)
+    _sprites.draw(_screen)
 # ===================================================================
 # INPUT
 # ===================================================================
@@ -241,28 +244,45 @@ class Vector:
 def random(min, max):
     return (rndm.random() * (max - min)) + min
 
-shouldQuit = False
+_shouldQuit = False
 def quit(probe=False):
-    global shouldQuit
+    global _shouldQuit
     if probe:
-        return shouldQuit
-    shouldQuit = True
+        return _shouldQuit
+    _shouldQuit = True
 
-clock = pygame.time.Clock()
+_clock = pygame.time.Clock()
 dt = 0
 def deltaTime(set=False):
-    global clock, dt
+    global _clock, dt
     if not set:
         return dt
-    dt = clock.tick() / 1000
+    dt = _clock.tick() / 1000
 
-def _pause():
-    pauseProgram = input("Press the <ENTER> key to continue...")
+TOP = "top"
+BOTTOM = "bottom"
+LEFT = "left"
+RIGHT = "right"
+
+def ifOnEdgeBounce(obj, *args):
+    if ("top" in args) and obj.position.y <= 0:
+        obj.setPos(obj.position.x, 0)
+        obj.setVel(obj.velocity.x, -obj.velocity.y)
+    elif ("bottom" in args) and obj.position.y >= _screenHeight:
+        obj.setPos(obj.position.x, _screenHeight)
+        obj.setVel(obj.velocity.x, -obj.velocity.y)
+    
+    if ("left" in args) and obj.position.x <= 0:
+        obj.setPos(0, obj.position.y)
+        obj.setVel(-obj.velocity.x, obj.velocity.y)
+    elif ("right" in args) and obj.position.x >= _screenWidth:
+        obj.setPos(_screenWidth, obj.position.y)
+        obj.setVel(obj.velocity.x, -obj.velocity.y)
 # ===================================================================
 # TEXT
 # ===================================================================
 def text(position, content="Text", **args):
-    global screen
+    global _screen
 
     if "size" in args:
         size = args["size"]
@@ -283,4 +303,4 @@ def text(position, content="Text", **args):
 
     textRect = textObj.get_rect()
     textRect.center = (position.x, position.y)
-    screen.blit(textObj, textRect)
+    _screen.blit(textObj, textRect)
