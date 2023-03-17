@@ -1,7 +1,11 @@
+# DON'T RUN ME
+
 import pygame, pygame.gfxdraw
 import random as rndm
 from math import floor
+import sys
 
+# A dictionary of all the keys I could be bothered to add
 KEYS = {
     "BACKSPACE"    : pygame.K_BACKSPACE,
     "TAB"          : pygame.K_TAB,
@@ -102,24 +106,25 @@ KEYS = {
     "R_ALT"        : pygame.K_RALT,
     "L_ALT"        : pygame.K_LALT,
 }
-
+# ===================================================================
 # SETUP
 # ===================================================================
 screen = None
-def createWindow(width=1280, height=720):
+def createWindow(width=1280, height=720, caption="Your Caption Here"):
     global screen
     screen = pygame.display.set_mode((width, height))
-
-def Title(content):
-    pygame.display.set_caption(content)
+    pygame.display.set_caption(caption)
 # ===================================================================
 # COLOUR && TEXTURE
 # ===================================================================
 def Background(*args):
     if len(args) == 1:
-        screen.fill((args[0], args[0], args[0]))
+        if type(args[0]) == int:
+            screen.fill((args[0], args[0], args[0]))
+        else:
+            screen.blit(args[0], (0, 0))
     elif len(args) == 3:
-        screen.fill((args[0], args[1], args[1]))
+        screen.fill((args[0], args[1], args[2]))
     else:
         print(f"Invalid number of arguments for Background (Expected: 1 or 3; Got: {len(args)})")
 
@@ -135,7 +140,6 @@ def Colour(*args):
         print(f"Invalid number of arguments for Colour (Expected: 1, 3, or 4; Got: {len(args)})")
 
 def Texture(path):
-    
     return pygame.image.load(path)
 # ===================================================================
 # SPRITE STUFF
@@ -149,13 +153,19 @@ class Sprite(pygame.sprite.Sprite):
     def __init__(self, spriteType, width, height, position, fill):
         super().__init__()
 
-        self.size = Vector(width, height)
+        self.width = width
+        self. height = height
 
         self.position = position
         self.velocity = Vector(0, 0)
 
         if spriteType == 0:
-            self.image = pygame.transform.scale(fill, (width, height))
+            try:
+                self.image = pygame.transform.scale(fill, (width, height)) # In this case, `fill` is of type `pygame.Surface`
+            except:
+                print("\nFailed to initialise Sprite: did you pass in a valid texture?\n")
+                sys.exit()
+                
         elif spriteType == 1:
             self.image = pygame.Surface((width + 1, height + 1), pygame.SRCALPHA)
             pygame.gfxdraw.aaellipse(self.image, int(width/2), int(height/2), int(width/2), int(height/2), fill)
@@ -228,7 +238,7 @@ class Vector:
 # ===================================================================
 # TOOLS
 # ===================================================================
-def random(min = 0, max = 1):
+def random(min, max):
     return (rndm.random() * (max - min)) + min
 
 shouldQuit = False
@@ -245,6 +255,9 @@ def deltaTime(set=False):
     if not set:
         return dt
     dt = clock.tick() / 1000
+
+def _pause():
+    pauseProgram = input("Press the <ENTER> key to continue...")
 # ===================================================================
 # TEXT
 # ===================================================================

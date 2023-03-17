@@ -1,16 +1,16 @@
+# RUN ME!!!!
+
 import pygame, project
 
 if __name__ == '__main__':
     pygame.init()
     project.setup()
 
-    shouldQuit = False
-    while not shouldQuit:
-        shouldQuit = project.quit(True)
+    while not project.quit(True):
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT: 
-                shouldQuit = True
+                project.quit()
         
         project.update()
         project.drawSprites()
