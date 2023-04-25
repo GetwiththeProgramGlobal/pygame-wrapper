@@ -111,7 +111,7 @@ class Sprite(pygame.sprite.Sprite):
         self.position = self.position.addVec(self.velocity.mult(deltaTime()))
 
         if self.target != None:
-            direction = self.position.direction(self.target.position).normalised()
+            direction = self.position.direction(self.target.position)
             self.addPos(direction.mult(self.speed))
             if self.colliding(self.target.group):
                 self.setPos(self.target.position)
@@ -361,7 +361,7 @@ class Vector:
         return Vector(self.x / mag, self.y / mag)
     
     def direction(self, target):
-        return Vector(target.x - self.x, target.y - self.y)
+        return Vector(target.x - self.x, target.y - self.y).normalised()
 
     def equals(self, vector):
         return self.x == vector.x and self.y == vector.y
