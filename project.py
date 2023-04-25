@@ -1,12 +1,13 @@
-from GWTPygame import *
+from gwtp import *
 
 WIDTH, HEIGHT = 1280, 720
 
+
 # Called once at the start
 def setup():
-    createWindow(WIDTH, HEIGHT)
-    title("Your Title Here")
+    createWindow(WIDTH, HEIGHT, "Your Caption Here")
+
 
 # Called every frame
 def update():
-    background(0, 0, 0)
+    Background(31, 174, 216)
