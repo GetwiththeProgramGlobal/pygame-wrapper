@@ -63,10 +63,13 @@ _spriteGroups = {
     "default" : pygame.sprite.Group()
 }
 class Sprite(pygame.sprite.Sprite):
-    def __init__(self, spriteType, width, height, position, fill, tag="defualt", **variables):
+    def __init__(self, spriteType, width, height, position, fill, **variables):
         super().__init__()
 
-        self.group = tag
+        if tag in variables:
+            self.group = tag
+        else:
+            self.group = "default"
 
         self.target = None
         self.speed = 0
