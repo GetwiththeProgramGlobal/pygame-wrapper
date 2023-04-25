@@ -11,6 +11,12 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT: 
                 project.quit()
+
+            if event.type == pygame.KEYDOWN:
+                project.setLastDown(event.key)
+
+            if event.type == pygame.KEYUP:
+                project.setLastUp(event.key)
         
         project.update()
         project.drawSprites()
@@ -18,6 +24,9 @@ def main():
 
         project.deltaTime(True)
 
+        # Late reset of single key events
+        project.setLastDown(-1)
+        project.setLastUp(-1)
     pygame.quit()
 
 if __name__ == '__main__':
