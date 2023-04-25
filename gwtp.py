@@ -1,6 +1,6 @@
 import pygame, pygame.gfxdraw
 import random as rndm
-from math import floor
+from math import floor, sqrt
 import sys
 
 # A dictionary of all the keys I could be bothered to add
@@ -146,14 +146,21 @@ def Texture(path):
 # ===================================================================
 # SPRITE STUFF
 # ===================================================================
-TEXTURE = "tex"
-ELLIPSE = "ell"
-RECT = "_"
+TEXTURE = 0
+ELLIPSE = 1
+RECT = 2
 
-_sprites = pygame.sprite.Group()
+_spriteGroups = {
+    "default" : pygame.sprite.Group()
+}
 class Sprite(pygame.sprite.Sprite):
-    def __init__(self, spriteType, width, height, position, fill):
+    def __init__(self, spriteType, width, height, position, fill, tag="defualt"):
         super().__init__()
+
+        self.group = tag
+
+        self.target = None
+        self.speed = 0
 
         self.width = width
         self. height = height
@@ -161,14 +168,17 @@ class Sprite(pygame.sprite.Sprite):
         self.position = position
         self.velocity = Vector(0, 0)
 
-        if spriteType == "tex":
+        if self.group not in _spriteGroups:
+            _spriteGroups[self.group] = pygame.sprite.Group()
+
+        if spriteType == TEXTURE:
             try:
                 self.image = pygame.transform.scale(fill, (width, height)) # In this case, `fill` is of type `pygame.Surface`
             except:
                 print("\nFailed to initialise Sprite: did you pass in a valid texture?\n")
                 sys.exit()
                 
-        elif spriteType == "ell":
+        elif spriteType == ELLIPSE:
             self.image = pygame.Surface((width + 1, height + 1), pygame.SRCALPHA)
             pygame.gfxdraw.aaellipse(self.image, int(width/2), int(height/2), int(width/2), int(height/2), fill)
             pygame.gfxdraw.filled_ellipse(self.image, int(width/2), int(height/2), int(width/2), int(height/2), fill)
@@ -176,12 +186,21 @@ class Sprite(pygame.sprite.Sprite):
             self.image = pygame.Surface((width, height), pygame.SRCALPHA)
             self.image.fill(fill)
         
-        self.rect = self.image.get_rect(center=(position.x - width, position.y - height))
-        _sprites.add(self)
+        self.rect = self.image.get_rect(center=(position.x, position.y))
+        _spriteGroups[self.group].add(self)
 
     def update(self):
         self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
+        self.position = self.position.addVec(self.velocity.mult(deltaTime()))
 
+        if self.target != None:
+            direction = self.position.direction(self.target.position).normalised()
+            self.addPos(direction.mult(self.speed))
+            if self.colliding(self.target.group):
+                self.setPos(self.target.position)
+                self.target = None
+
+# Movement
     def setPos(self, *position):
         if type(position[0]) == Vector:
             posToSet = position[0]
@@ -208,13 +227,25 @@ class Sprite(pygame.sprite.Sprite):
             vecToAdd = velocity[0]
         else:
             vecToAdd = Vector(velocity[0], velocity[1])
-        self.velocity = self.velocity.addVec(vecToAdd.mult(deltaTime()))
+        self.velocity = self.velocity.addVec(vecToAdd.mult(deltaTime())) 
+
+    def goTo(self, target, speed):
+        self.target = target
+        self.speed = speed
+        
+
+# Collision
+    def colliding(self, target):
+        targetGroup = _spriteGroups[target]
+        return pygame.sprite.spritecollide(self, targetGroup, False)
+
 
 def drawSprites():
-    for sprite in _sprites:
-        sprite.update()
-
-    _sprites.draw(_screen)
+    groups = _spriteGroups.values()
+    for group in groups:
+        for sprite in group:
+            sprite.update()
+        group.draw(_screen)
 # ===================================================================
 # INPUT
 # ===================================================================
@@ -237,6 +268,24 @@ class Vector:
 
     def addVec(self, vector):
         return Vector(self.x + vector.x, self.y + vector.y)
+
+    def squareMagnitude(self):
+        return pow(self.x, 2) + pow(self.y, 2)
+    
+    def magnitude(self):
+        return sqrt(self.squareMagnitude())
+
+    def normalised(self):
+        mag = self.magnitude()
+        if mag == 0:
+            return Vector(0, 0)
+        return Vector(self.x / mag, self.y / mag)
+    
+    def direction(self, target):
+        return Vector(target.x - self.x, target.y - self.y)
+
+    def equals(self, vector):
+        return self.x == vector.x and self.y == vector.y
 # ===================================================================
 # TOOLS
 # ===================================================================
@@ -280,7 +329,7 @@ def ifOnEdgeBounce(obj, *edges):
 # ===================================================================
 # TEXT
 # ===================================================================
-def text(position, content="Text", **args):
+def Text(position, content="Text", **args):
     global _screen
 
     if "size" in args:
