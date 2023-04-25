@@ -66,8 +66,8 @@ class Sprite(pygame.sprite.Sprite):
     def __init__(self, spriteType, width, height, position, fill, **variables):
         super().__init__()
 
-        if tag in variables:
-            self.group = tag
+        if "tag" in variables:
+            self.group = variables["tag"]
         else:
             self.group = "default"
 
