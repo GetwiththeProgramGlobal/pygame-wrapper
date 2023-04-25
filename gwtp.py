@@ -62,14 +62,6 @@ TOP, BOTTOM, LEFT, RIGHT, ALL = range(5)
 _spriteGroups = {
     "default" : pygame.sprite.Group()
 }
-
-def getSpritesheet(sheet, width, height):
-    image = pygame.Surface((width, height)).convert_alpha()
-    image.blit()
-    return image
-
-
-
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, spriteType, width, height, position, fill, tag="defualt", **variables):
         super().__init__()
