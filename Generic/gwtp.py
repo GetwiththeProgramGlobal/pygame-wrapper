@@ -60,22 +60,33 @@ TEXTURE, ELLIPSE, RECT = range(3)
 TOP, BOTTOM, LEFT, RIGHT, ALL = range(5)
 
 _spriteGroups = {
-    "default" : pygame.sprite.Group()
+    "default" : pygame.sprite.LayeredUpdates()
 }
+
+def getSpritesheet(sheet, width, height):
+    image = pygame.Surface((width, height)).convert_alpha()
+    image.blit()
+    return image
+
+
+
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, spriteType, width, height, position, fill, **variables):
         super().__init__()
 
+        self.group = "default"
         if "tag" in variables:
             self.group = variables["tag"]
-        else:
-            self.group = "default"
 
         self.target = None
         self.speed = 0
 
+        self._layer = 0
+        if "layer" in variables:
+            self._layer = variables["layer"]
+
         self.width = width
-        self. height = height
+        self.height = height
 
         self.position = position
         self.velocity = Vector(0, 0)
@@ -85,14 +96,13 @@ class Sprite(pygame.sprite.Sprite):
         self.visible = True
 
         if self.group not in _spriteGroups:
-            _spriteGroups[self.group] = pygame.sprite.Group()
+            _spriteGroups[self.group] = pygame.sprite.LayeredUpdates()
 
         if spriteType == TEXTURE:
             try:
                 self.image = pygame.transform.scale(fill, (width, height)) # In this case, `fill` is of type `pygame.Surface`
             except:
                 print("\nFailed to initialise Sprite: did you pass in a valid texture?\n")
-                sys.exit()
                 
         elif spriteType == ELLIPSE:
             self.image = pygame.Surface((width + 1, height + 1), pygame.SRCALPHA)
@@ -108,10 +118,11 @@ class Sprite(pygame.sprite.Sprite):
     # Main
     def update(self):
         self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
-        self.position = self.position.addVec(self.velocity.mult(deltaTime()))
+        # self.velocity = self.velocity.multv(self.velocity.normalised())
+        self.position = self.position.addVec(self.velocity)
 
         if self.target != None:
-            direction = self.position.direction(self.target.position)
+            direction = self.position.direction(self.target.position).normalised()
             self.addPos(direction.mult(self.speed))
             if self.colliding(self.target.group):
                 self.setPos(self.target.position)
@@ -162,16 +173,19 @@ class Sprite(pygame.sprite.Sprite):
             velToSet = velocity[0]
         else:
             velToSet = Vector(velocity[0], velocity[1])
-        self.velocity = velToSet
+        self.velocity = velToSet.multv(velToSet.normalised()).mult(deltaTime())
 
     def addVel(self, *velocity):
         if type(velocity[0]) == Vector:
             vecToAdd = velocity[0]
         else:
             vecToAdd = Vector(velocity[0], velocity[1])
-        self.velocity = self.velocity.addVec(vecToAdd.mult(deltaTime())) 
+        self.velocity = self.velocity.addVec(vecToAdd.multv(vecToAdd.normalised()).mult(deltaTime())) 
 
     def goTo(self, target, speed):
+        if speed == 0:
+            self.setPos(target.position)
+            return
         self.target = target
         self.speed = speed
         
@@ -345,6 +359,9 @@ class Vector:
     def mult(self, scalar):
         return Vector(self.x * scalar, self.y * scalar)
 
+    def multv(self, vector):
+        return Vector(self.x * vector.x, self.y * vector.y)
+
     def addVec(self, vector):
         return Vector(self.x + vector.x, self.y + vector.y)
 
@@ -361,7 +378,7 @@ class Vector:
         return Vector(self.x / mag, self.y / mag)
     
     def direction(self, target):
-        return Vector(target.x - self.x, target.y - self.y).normalised()
+        return Vector(target.x - self.x, target.y - self.y)
 
     def equals(self, vector):
         return self.x == vector.x and self.y == vector.y
@@ -391,7 +408,8 @@ HOUR, MIN, SEC, MS = range(4)
 class Clock:
     def __init__(self, *mode):
         self.millis = 0
-        self.time = [0, 0, 0, 0]
+        self.time = [0, 0, 0, 0] # ms, s, m, h
+        self.timeOut = ["000", "00", "00", "00"]
         self.running = False
         self.mode = mode
 
@@ -407,6 +425,14 @@ class Clock:
             self.time[1] = int((self.millis - (self.time[3] * 3600000) - (self.time[2] * 60000)) // 1000)
         if MS in self.mode:
             self.time[0] = int(self.millis - (self.time[3] * 3600000) - (self.time[2] * 60000) - (self.time[1] * 1000))
+        
+        for i in range(4):
+            self.timeOut[i] = str(self.time[i])
+        while len(self.timeOut[0]) < 3:
+            self.timeOut[0] = "0" + self.timeOut[0]
+        for i in range(1, 4):
+            while len(self.timeOut[i]) < 2:
+                self.timeOut[i] = "0" + self.timeOut[i]
 
     def start(self):
         self.running = True
@@ -415,43 +441,41 @@ class Clock:
         self.running = False
 
     def getTime(self):
-        return self.time
+        return self.timeOut
     
-    def reset():
-        self.time = 0
+    def reset(self):
+        self.time = [0, 0, 0, 0]
+        self.millis = 0
 
 # ===================================================================
 # TEXT
 # ===================================================================
-def Text(position, content="Text", **args):
-    global _screen
+def Text(position, content="Text", **options):
+    size = 32
+    if "size" in options:
+        size = options["size"]
 
-    if "size" in args:
-        size = args["size"]
+    fill = Colour(0)
+    if "fill" in options:
+        fill = options["fill"]
+
+    font = pygame.font.Font(pygame.font.get_default_font(), size)
+    if "font" in options:
+        font = pygame.font.Font(f"{options['font']}.ttf", size)
+
+    highlight = (0, 0, 0, 0)
+    if "highlight" in options:
+        highlight = options["highlight"]
+
+    render = font.render(content, True, fill, highlight)
+    rect = render.get_rect()
+
+    if "align" in options:
+        if options["align"] == "centre":
+            rect.center = (position.x, position.y)
+        else:
+            setattr(rect, options["align"], position.x)
+        rect.center = (rect.centerx, position.y)
     else:
-        size = 32
-
-    if "fill" in args:
-        fill = args["fill"]
-    else:
-        fill = Colour(0, 0, 0)
-
-    fontObj = pygame.font.Font('freesansbold.ttf', size)
-
-    if "highlight" in args:
-        textObj = fontObj.render(content, True, fill, args["highlight"])
-    else:
-        textObj = fontObj.render(content, True, fill)
-
-    textRect = textObj.get_rect()
-    if "align" in args:
-        if args["align"] == "centre":
-            textRect.center = (position.x, position.y)
-        if args["align"] == "left":
-            setattr(textRect, "left", position.x)
-        if args["align"] == "right":
-            setattr(textRect, "right", position.x)
-        textRect.center = (textRect.centerx, position.y)
-    else:
-        textRect.center = (position.x, position.y)
-    _screen.blit(textObj, textRect)
+        rect.center = (position.x, position.y)
+    _screen.blit(render, rect)
